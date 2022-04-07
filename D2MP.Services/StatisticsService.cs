@@ -33,8 +33,7 @@ namespace D2MP.Services
                 res = res.Where(x => x.Hero1Name.ToLower().Contains(heroName.ToLower()) 
                                   || x.Hero2Name.ToLower().Contains(heroName.ToLower()));
 
-            if (matchCountFilter != 200)
-                res = res.Where(x => x.MatchesCount > matchCountFilter);
+            res = res.Where(x => x.MatchesCount > matchCountFilter);
 
             res = res.OrderByDescending(x => x.WinRate)
                      .Skip(pageSize * (page - 1))

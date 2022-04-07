@@ -48,6 +48,8 @@ namespace D2MP.Services
             string queryString = QueryBuilder(_baseAddres, "IDOTA2Match_570/GetMatchHistoryBySequenceNum/v0001/", KeyString, extra.ToString());
             string content = await GetStringAsync(queryString);
 
+            if (content == null) return null;
+
             var apiResult = JsonConvert.DeserializeObject<ApiResponse<GetMatchHistoryBySequenceNumResponse>>(content);
 
             if (apiResult?.Result?.Status != 1)
@@ -68,10 +70,11 @@ namespace D2MP.Services
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, address);
             var response = await _client.SendAsync(request);
 
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                return null;
+
             if (response.StatusCode == HttpStatusCode.Forbidden)
                 throw new InvalidApiKeyException("Api-Key most likely wrong");
-            else if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second.");
             else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
                 throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second.");
 

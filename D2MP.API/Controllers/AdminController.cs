@@ -17,9 +17,9 @@ namespace D2MP.API.Controllers
 
         [HttpPut]
         [Route("scrape/start")]
-        public ActionResult StartScrape()
+        public ActionResult StartScrape(long matchSeqNum = -1)
         {
-            _matchScrapingService.Start();
+            _matchScrapingService.Start(matchSeqNum);
 
             return Ok();
         }

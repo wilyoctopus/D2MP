@@ -74,8 +74,6 @@ namespace D2MP.Services
                     if (_cts.Token.IsCancellationRequested)
                         return;
 
-                    //var result = await _matchService.GetMatchHistoryBySequenceNumber(i.ToString());
-
                     var result = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
                                                    TimeSpan.FromSeconds(6),
                                                    _cts.Token);

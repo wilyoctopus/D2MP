@@ -1,6 +1,8 @@
-
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,dotnetcore,aspnetcore,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,dotnetcore,aspnetcore,visualstudiocode
+
+### Docker ###
+.env
 
 ### ASPNETCore ###
 ## Ignore Visual Studio temporary files, build results, and

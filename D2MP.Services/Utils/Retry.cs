@@ -23,11 +23,12 @@ namespace D2MP.Services.Utils
                     {
                         Thread.Sleep(retryInterval);
                     }
-                    return await action();
-                }
-                catch (ServiceUnavailableException ex)
-                {
-                    maxAttemptCount++;
+                    var result = await action();
+
+                    if (result != null)
+                        return result;
+                    else
+                        maxAttemptCount++;
                 }
                 catch (Exception ex)
                 {

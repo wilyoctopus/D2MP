@@ -6,7 +6,7 @@ namespace D2MP.Infrastructure
     {
         public string GetDatabaseConnectionString()
         {
-            return Environment.GetEnvironmentVariable(Constants.EnvDatabaseConnectionStringKey);
+            return Environment.GetEnvironmentVariable(Constants.EnvDatabaseConnectionStringKey);    
         }
 
         public string GetSteamApiSecret()

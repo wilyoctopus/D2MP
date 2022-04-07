@@ -2,8 +2,9 @@
 {
     public static class Constants
     {
-        public const string EnvDatabaseConnectionStringKey = "d2mp_db_conn_string";
-        public const string EnvSteamApiSecretKey = "d2mp_steam_api_secret";
+        public const string EnvDatabaseConnectionStringKey = "D2MP_DB_CONN_STRING"; 
+        public const string EnvSteamApiSecretKey = "D2MP_STEAM_API_KEY";
+
         public const string CacheHeroDuosKey = "cache_hero_duos";
     }
 }
