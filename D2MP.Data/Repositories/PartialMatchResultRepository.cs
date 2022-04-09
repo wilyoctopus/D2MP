@@ -15,7 +15,7 @@ namespace D2MP.Data.Repositories
             _connectionString = configurationProvider.GetDatabaseConnectionString();
         }
 
-        public async Task<PartialMatchResult[]> GetAll()
+        public async Task<PartialMatchResult[]> GetAllAsync()
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -24,37 +24,44 @@ namespace D2MP.Data.Repositories
             }
         }
 
-        public async Task Insert(PartialMatchResult match)
+        public async Task InsertAsync(PartialMatchResult match)
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                await connection.ExecuteAsync("INSERT INTO partial_match_results (hero_ids, won) VALUES (@hero_ids, @won);", new { hero_ids = match.HeroIds, won = match.Won });
+                await connection.ExecuteAsync("INSERT INTO partial_match_results (radiant_hero_ids, dire_hero_ids, radiant_won, match_seq_number) " +
+                                              "VALUES (@radiant_hero_ids, @dire_hero_ids, @radiant_won, @match_seq_number);", 
+                                              new { radiant_hero_ids = match.RadiantHeroIds, 
+                                                    dire_hero_ids = match.DireHeroIds,
+                                                    radiant_won = match.RadiantWon,
+                                                    match_seq_number = match.MatchSeqNumber
+                                              });
             }
         }
 
-        public async Task<long> GetLastMatchSeqId()
+        public async Task<long> GetLastMatchSeqIdAsync()
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
-                var q = await connection.QueryFirstAsync<long>("SELECT MAX(match_seq_id) FROM processed_matches");
+                var q = await connection.QueryFirstAsync<long>("SELECT MAX(match_seq_number) FROM partial_match_results");
                 return q;
             }
         }
 
-        public async Task<int> Count()
+        public long GetLastMatchSeqId()
+        {
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                var q = connection.QueryFirst<long>("SELECT MAX(match_seq_number) FROM partial_match_results");
+                return q;
+            }
+        }
+
+        public async Task<int> CountAsync()
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 var q = await connection.QueryFirstAsync<int>("SELECT COUNT(*) FROM partial_match_results");
                 return q;
-            }
-        }
-
-        public async Task Insert(long processedMatchSeqId)
-        {
-            using (var connection = new NpgsqlConnection(_connectionString))
-            {
-                await connection.ExecuteAsync("INSERT INTO processed_matches (match_seq_id) VALUES (@match_seq_id);", new { match_seq_id = processedMatchSeqId });
             }
         }
     }

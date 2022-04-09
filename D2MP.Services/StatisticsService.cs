@@ -21,7 +21,7 @@ namespace D2MP.Services
             _cache = cache;
         }
 
-        public async Task<IEnumerable<HeroDuo>> GetDuoStats(int page = 1, string heroName = null, int matchCountFilter = 200)
+        public async Task<IEnumerable<HeroDuo>> GetDuoStats(int page = 1, string heroName = null, int matchCountFilter = -1)
         {
             var res = _cache.Get<IOrderedEnumerable<HeroDuo>>(Constants.CacheHeroDuosKey).AsEnumerable();
             var pageSize = 123;
@@ -45,12 +45,13 @@ namespace D2MP.Services
 
         public async Task<IOrderedEnumerable<HeroDuo>> CalculateHeroDuos()
         {
-            var matches = await _matchRepository.GetAll();
+            var matches = await _matchRepository.GetAllAsync();
             var combos = await GetHeroDuos();
-            
+
             Parallel.ForEach(matches, match =>
             {
-                ProcessMatchResult(match, combos);
+                ProcessTeamResult(match.GetRadiantHeroIdsArray(), won: match.RadiantWon, combos);
+                ProcessTeamResult(match.GetDireHeroIdsArray(), won: !match.RadiantWon, combos);
             });
 
             var wrFirst = combos.ToList().OrderByDescending(c => c.WinRate);
@@ -60,9 +61,9 @@ namespace D2MP.Services
             return wrFirst;
         }
 
-        private void ProcessMatchResult(PartialMatchResult match, HashSet<HeroDuo> combos)
+        private void ProcessTeamResult(short[] heroIds, bool won, HashSet<HeroDuo> combos)
         {
-            var heroCombosInMatch = Combinations(match.GetHeroIdsArray(), 2).Select(ids =>
+            var heroCombosInMatch = Combinations(heroIds, 2).Select(ids =>
             {
                 return new HeroDuo() { Hero1Id = ids[0], Hero2Id = ids[1] }; //
             });
@@ -71,7 +72,7 @@ namespace D2MP.Services
             {
                 var res = combos.TryGetValue(heroCombo, out var combo);
 
-                if (match.Won)
+                if (won)
                     Interlocked.Increment(ref combo.MatchesWon);
                 else
                     Interlocked.Increment(ref combo.MatchesLost);

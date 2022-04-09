@@ -8,11 +8,10 @@ namespace D2MP.Data.Migrations
         public override void Up()
         {
             Create.Table("partial_match_results")
-                .WithColumn("hero_ids").AsString()
-                .WithColumn("won").AsBoolean();
-
-            Create.Table("processed_matches")
-                .WithColumn("match_seq_id").AsInt64();
+                .WithColumn("radiant_hero_ids").AsString()
+                .WithColumn("dire_hero_ids").AsString()
+                .WithColumn("radiant_won").AsBoolean()
+                .WithColumn("match_seq_number").AsInt64();
 
             Create.Table("heroes")
                 .WithColumn("id").AsInt16()

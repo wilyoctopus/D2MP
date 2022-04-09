@@ -35,7 +35,7 @@ namespace D2MP.Services
                 if (_scrapeServiceTask != null && _cts != null) return;
 
                 if (matchSeqNumber == -1)
-                    matchSeqNumber = _matchRepository.GetLastMatchSeqId().Result + 1;
+                    matchSeqNumber = _matchRepository.GetLastMatchSeqId() + 1;
 
                 _cts = new CancellationTokenSource();
                 _scrapeServiceTask = Task.Run(() => FetchData(matchSeqNumber), _cts.Token);
@@ -102,25 +102,26 @@ namespace D2MP.Services
 
             foreach (var match in matches)
             {
-                var team1heroIds = match.PickAndBans.Where(pb => pb.IsPick == true && pb.Faction == Faction.Radiant).Select(x => x.HeroId).ToArray();
-                var team2heroIds = match.PickAndBans.Where(pb => pb.IsPick == true && pb.Faction == Faction.Dire).Select(x => x.HeroId).ToArray();
+                var radiantHeroIds = match.PickAndBans.Where(pb => pb.IsPick == true && pb.Faction == Faction.Radiant).Select(x => x.HeroId).ToArray();
+                var direHeroIds = match.PickAndBans.Where(pb => pb.IsPick == true && pb.Faction == Faction.Dire).Select(x => x.HeroId).ToArray();
 
-                // skip any non 5v5 matches
-                if (team1heroIds.Count() + team2heroIds.Count() != 10)
+                // For some reason, all-pick mode games sometimes have more than 10 heroes
+                // Assuming that those are some custom lobbies/cheating/etc, we skip them
+                if (radiantHeroIds.Count() + direHeroIds.Count() != 10)
                     continue;
 
-                Array.Sort(team1heroIds);
-                Array.Sort(team2heroIds);
+                Array.Sort(radiantHeroIds);
+                Array.Sort(direHeroIds);    
 
-                var team1won = match.WinningFaction == Faction.Radiant;
-                var team2won = !team1won;
+                var pmr = new PartialMatchResult()
+                {
+                    RadiantWon = match.WinningFaction == Faction.Radiant,
+                    RadiantHeroIds = string.Join(',', radiantHeroIds),
+                    DireHeroIds = string.Join(',', direHeroIds),
+                    MatchSeqNumber = match.MatchSequenceNumber
+                };
 
-                var dbModel1 = new PartialMatchResult() { HeroIds = string.Join(',', team1heroIds), Won = team1won };
-                var dbModel2 = new PartialMatchResult() { HeroIds = string.Join(',', team2heroIds), Won = team2won };
-
-                await _matchRepository.Insert(dbModel1);
-                await _matchRepository.Insert(dbModel2);
-                await _matchRepository.Insert(match.MatchSequenceNumber);
+                await _matchRepository.InsertAsync(pmr);
             }
         }
     }

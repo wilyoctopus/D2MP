@@ -2,9 +2,12 @@
 {
     public class PartialMatchResult
     {
-        public string HeroIds;
-        public bool Won;
+        public string RadiantHeroIds;
+        public string DireHeroIds;
+        public long MatchSeqNumber;
+        public bool RadiantWon;
 
-        public short[] GetHeroIdsArray() => HeroIds.Split(",").Select(x => short.Parse(x)).ToArray();
+        public short[] GetRadiantHeroIdsArray() => RadiantHeroIds.Split(",").Select(x => short.Parse(x)).ToArray();
+        public short[] GetDireHeroIdsArray() => DireHeroIds.Split(",").Select(x => short.Parse(x)).ToArray();
     }
 }

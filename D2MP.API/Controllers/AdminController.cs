@@ -9,10 +9,13 @@ namespace D2MP.API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IMatchScrapingService _matchScrapingService;
+        private readonly IStatisticsService _statisticsService;
 
-        public AdminController(IMatchScrapingService matchScrapingService)
+        public AdminController(IMatchScrapingService matchScrapingService,
+                               IStatisticsService statisticsService)
         {
             _matchScrapingService = matchScrapingService;
+            _statisticsService = statisticsService;
         }
 
         [HttpPut]
@@ -40,6 +43,15 @@ namespace D2MP.API.Controllers
             var status = _matchScrapingService.GetStatus();
 
             return Ok(status);
+        }
+
+        [HttpPut]
+        [Route("statistics/recalculate")]
+        public async Task<ActionResult> RecalculateStatistics()
+        {
+            await _statisticsService.CalculateHeroDuos();
+
+            return Ok();
         }
     }
 }

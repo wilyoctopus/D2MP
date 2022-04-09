@@ -4,10 +4,10 @@ namespace D2MP.Data.Interfaces
 {
     public interface IPartialMatchResultRepository
     {
-        Task<int> Count();
-        Task<long> GetLastMatchSeqId();
-        Task<PartialMatchResult[]> GetAll();
-        Task Insert(PartialMatchResult match);
-        Task Insert(long processedMatchSeqId);
+        Task<int> CountAsync();
+        Task<long> GetLastMatchSeqIdAsync();
+        long GetLastMatchSeqId();
+        Task<PartialMatchResult[]> GetAllAsync();
+        Task InsertAsync(PartialMatchResult match);
     }
 }
