@@ -1,3 +1,4 @@
+using D2MP.API.Filters;
 using D2MP.Models.Models;
 using D2MP.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace D2MP.API.Controllers
 {
     [ApiController]
+    [BasicAuthFilter]
     [Route("admin")]
     public class AdminController : ControllerBase
     {

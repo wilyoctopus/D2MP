@@ -9,6 +9,7 @@ services:
     environment:
       - D2MP_DB_CONN_STRING=${D2MP_DB_CONN_STRING}
       - D2MP_STEAM_API_KEY=${D2MP_STEAM_API_KEY}
+      - D2MP_BASIC_AUTH_SECRET=${D2MP_BASIC_AUTH_SECRET}
     depends_on:
       - 'postgres'
     networks:

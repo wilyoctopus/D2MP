@@ -13,5 +13,10 @@ namespace D2MP.Infrastructure
         {
             return Environment.GetEnvironmentVariable(Constants.EnvSteamApiSecretKey);
         }
+
+        public string GetBasicAuthSecret()
+        {
+            return Environment.GetEnvironmentVariable(Constants.EnvBasicAuthSecretKey);
+        }
     }
 }

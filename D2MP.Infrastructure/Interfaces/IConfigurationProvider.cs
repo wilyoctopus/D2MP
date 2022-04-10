@@ -4,5 +4,6 @@
     {
         string GetDatabaseConnectionString();
         string GetSteamApiSecret();
+        string GetBasicAuthSecret();
     }
 }
