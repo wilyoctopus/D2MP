@@ -21,7 +21,7 @@ namespace D2MP.Services
             _cache = cache;
         }
 
-        public async Task<IEnumerable<HeroDuo>> GetDuoStats(int page = 1, string heroName = null, int matchCountFilter = -1)
+        public async Task<IEnumerable<HeroDuo>> GetDuoStats(int page = 1, string heroName = null, int minMatchCount = -1)
         {
             var res = _cache.Get<IOrderedEnumerable<HeroDuo>>(Constants.CacheHeroDuosKey).AsEnumerable();
             var pageSize = 123;
@@ -33,7 +33,7 @@ namespace D2MP.Services
                 res = res.Where(x => x.Hero1Name.ToLower().Contains(heroName.ToLower()) 
                                   || x.Hero2Name.ToLower().Contains(heroName.ToLower()));
 
-            res = res.Where(x => x.MatchesCount > matchCountFilter);
+            res = res.Where(x => x.MatchCount > minMatchCount);
 
             res = res.OrderByDescending(x => x.WinRate)
                      .Skip(pageSize * (page - 1))
@@ -41,6 +41,11 @@ namespace D2MP.Services
                      
 
             return res;
+        }
+
+        public async Task<long> GetMatchCount()
+        {
+            return await _matchRepository.CountAsync();
         }
 
         public async Task<IOrderedEnumerable<HeroDuo>> CalculateHeroDuos()

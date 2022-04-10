@@ -14,6 +14,8 @@ namespace D2MP.Models.Enums
         Tutorial = 3,
         COOPWithBots = 4,
         TeamMatch = 5,
-        SoloQueue = 6
+        SoloQueue = 6,
+        Ranked = 7,
+        OneVersusOne = 8
     }
 }

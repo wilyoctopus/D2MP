@@ -1,32 +1,55 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Meta Party!</title>
-    <script type="text/javascript" src="Scripts/mp.js"></script>
-    <link rel="stylesheet" href="Styles/mp.css">
-</head>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Meta Party!</title>
+        <script type="text/javascript" src="Scripts/mp.js"></script>
+        <link rel="stylesheet" href="Styles/mp.css">
+        <link rel="icon" type="image/png" sizes="32x32" href="Images/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon-16x16.png">
+    </head>
 
-<body>
-    <h1>Meta party</h1>
-    <p>We collect stats about hero duos</p>
-    <script>populateDuoStats();</script>
+    <body>
+        <h1>Meta party</h1>
+        <p>Dota 2 hero combos winrate <br />
+           Combinations are based on public ranked matches <br />
+           Actual for patch 7.31b <br />
+           Matches processed: <span id="matchCount">0</span> <br />
+        </p>
+        <br/>
+        
+        <table id="heroDuoStats">
+            <thead>
+                <tr>
+                    <th colspan="2">
+                        <input type="text" id="heroSearchTextBox" placeholder="Search by hero name" />
+                    </th>
+                    <th rowspan="2">Winrate, %</th>
+                    <th>
+                        <input type="number" id="matchCountSearchTextBox" placeholder="Min. matches" />
+                    </th>
+                </tr>
+                <tr>
+                    <th>Hero 1</th>
+                    <th>Hero 2</th>
+                    <th># of matches</th>
+                </tr>
+            </thead>
+            <tbody>
 
-    <input type="text" id="searchTextBox" />
-    <table id="heroDuoStats">
-        <thead>
-            <tr>
-                <th>Hero 1</th>
-                <th>Hero 2</th>
-                <th>Winrate, %</th>
-            </tr>
-        </thead>
-        <tbody>
+            </tbody>
+        </table>
 
-        </tbody>
-    </table>
-</body>
+        <footer>
+            <p>
+                Contact: d2metaparty@gmail.com
+            </p>
+            <p>
+                Dota 2 is a registered trademark of Valve Corporation. This site is not affiliated with Valve Corporation. All game images and names are property of Valve Corporation.
+            </p>
+        </footer>
+    </body>
 
 </html>

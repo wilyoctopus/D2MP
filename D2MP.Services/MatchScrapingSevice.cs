@@ -67,51 +67,44 @@ namespace D2MP.Services
 
         private async Task FetchData(long matchSeqNumber)
         {
-            try
+            for (long i = matchSeqNumber; true;)
             {
-                for (long i = matchSeqNumber; true;)
-                {
-                    if (_cts.Token.IsCancellationRequested)
-                        return;
+                if (_cts.Token.IsCancellationRequested)
+                    return;
 
-                    var result = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
-                                                   TimeSpan.FromSeconds(6),
-                                                   _cts.Token);
+                var result = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
+                                               TimeSpan.FromSeconds(6),
+                                               _cts.Token);
 
-                    if (result == null)
-                        return;
+                if (result == null)
+                    return;
 
-                    await FilterAndSaveMatches(result.Matches);
+                await FilterAndSaveMatches(result.Matches);
 
-                    i = result.Matches.OrderBy(x => x.MatchSequenceNumber)
-                                      .Last()
-                                      .MatchSequenceNumber + 1;
+                i = result.Matches.OrderBy(x => x.MatchSequenceNumber)
+                                  .Last()
+                                  .MatchSequenceNumber + 1;
 
-                    _lastProcessedMatchTime = DateTime.UtcNow;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(JsonSerializer.Serialize(ex));
+                _lastProcessedMatchTime = DateTime.UtcNow;
             }
         }
 
         private async Task FilterAndSaveMatches(IEnumerable<DetailedMatch> matches)
         {
-            matches = matches.Where(m => m.GameMode == GameMode.AllPick);
+            matches = matches.Where(m => m.GameMode == GameMode.AllPick && m.LobbyType == LobbyType.Ranked);
 
             foreach (var match in matches)
             {
                 var radiantHeroIds = match.PickAndBans.Where(pb => pb.IsPick == true && pb.Faction == Faction.Radiant).Select(x => x.HeroId).ToArray();
                 var direHeroIds = match.PickAndBans.Where(pb => pb.IsPick == true && pb.Faction == Faction.Dire).Select(x => x.HeroId).ToArray();
 
-                // For some reason, all-pick mode games sometimes have more than 10 heroes
+                // For some reason, ranked mode games sometimes have more than 10 heroes
                 // Assuming that those are some custom lobbies/cheating/etc, we skip them
                 if (radiantHeroIds.Count() + direHeroIds.Count() != 10)
                     continue;
 
                 Array.Sort(radiantHeroIds);
-                Array.Sort(direHeroIds);    
+                Array.Sort(direHeroIds);
 
                 var pmr = new PartialMatchResult()
                 {

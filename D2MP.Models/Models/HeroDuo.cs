@@ -11,12 +11,12 @@
         public int MatchesWon = 0;
         public int MatchesLost = 0;
 
-        public double MatchesCount => (MatchesWon + MatchesLost);
-        public double WinRate => MatchesCount == 0 ? 0 : Math.Round(((double)MatchesWon / (double)(MatchesWon + MatchesLost)) * 100, 2);
+        public double MatchCount => (MatchesWon + MatchesLost);
+        public double WinRate => MatchCount == 0 ? 0 : Math.Round(((double)MatchesWon / (double)(MatchesWon + MatchesLost)) * 100, 2);
 
         public override string ToString()
         {
-            return $"{Hero1Name}, {Hero2Name}: WR% - {WinRate.ToString("N2")}; Match Count - {MatchesCount}";
+            return $"{Hero1Name}, {Hero2Name}: WR% - {WinRate.ToString("N2")}; Match Count - {MatchCount}";
         }
 
         public override int GetHashCode()

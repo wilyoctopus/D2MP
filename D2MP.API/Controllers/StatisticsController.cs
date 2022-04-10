@@ -20,12 +20,24 @@ namespace D2MP.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get(string? heroName = null)
+        public async Task<ActionResult> Get(string? heroName, int? minMatchCount)
         {
-            var result = await _statisticsService.GetDuoStats(heroName: heroName);
+            var result = await _statisticsService.GetDuoStats(heroName: heroName,
+                                                              minMatchCount: minMatchCount.HasValue 
+                                                                ? minMatchCount.Value 
+                                                                : 0
+                                                              );
             var response = _mapper.Map<IEnumerable<DuoStats>>(result);
 
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("matchCount")]
+        public async Task<ActionResult> MatchCount()
+        {
+            var matchCount = await _statisticsService.GetMatchCount();
+            return Ok(new { matchCount });
         }
     }
 }

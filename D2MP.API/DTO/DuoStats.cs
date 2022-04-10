@@ -10,5 +10,7 @@ namespace D2MP.API.DTO
         public int Hero2Id { get; set; }
         [JsonPropertyName("w")]
         public double WinRate { get; set; }
+        [JsonPropertyName("m")]
+        public int MatchCount { get; set; }
     }
 }
