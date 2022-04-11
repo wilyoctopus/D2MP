@@ -10,6 +10,8 @@ services:
       - D2MP_DB_CONN_STRING=${D2MP_DB_CONN_STRING}
       - D2MP_STEAM_API_KEY=${D2MP_STEAM_API_KEY}
       - D2MP_BASIC_AUTH_SECRET=${D2MP_BASIC_AUTH_SECRET}
+    volumes:
+      - /etc/letsencrypt/live/metaparty.tips:/https:ro
     depends_on:
       - 'postgres'
     networks:
