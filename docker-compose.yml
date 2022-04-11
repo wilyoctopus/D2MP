@@ -6,12 +6,16 @@ services:
       dockerfile: Dockerfile
     ports:
       - '80:80'
+      - '443:443'
     environment:
       - D2MP_DB_CONN_STRING=${D2MP_DB_CONN_STRING}
       - D2MP_STEAM_API_KEY=${D2MP_STEAM_API_KEY}
       - D2MP_BASIC_AUTH_SECRET=${D2MP_BASIC_AUTH_SECRET}
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${D2MP_SSL_CERT_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/ssl_cert.pfx
+      - ASPNETCORE_URLS=https://+:443;http://+:80
     volumes:
-      - /etc/letsencrypt/live/metaparty.tips:/https:ro
+      - '/etc/letsencrypt/live/metaparty.tips:/https'
     depends_on:
       - 'postgres'
     networks:
