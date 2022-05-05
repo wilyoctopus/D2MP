@@ -69,6 +69,8 @@ namespace D2MP.Services
 
         private async Task FetchData(long matchSeqNumber)
         {
+            _logger.LogInformation("Started fetching match data");
+
             try
             {
                 for (long i = matchSeqNumber; true;)
