@@ -4,8 +4,7 @@ using D2MP.Models.Enums;
 using D2MP.Models.Models;
 using D2MP.Services.Interfaces;
 using D2MP.Services.Utils;
-using System.Diagnostics;
-using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace D2MP.Services
 {
@@ -13,6 +12,7 @@ namespace D2MP.Services
     {
         private readonly IMatchService _matchService;
         private readonly IPartialMatchResultRepository _matchRepository;
+        private readonly ILogger<MatchScrapingSevice> _logger;
 
         private static object _lock = new object();
         private static CancellationTokenSource _cts = null;
@@ -20,10 +20,12 @@ namespace D2MP.Services
         private static DateTime _lastProcessedMatchTime = DateTime.MinValue;
 
         public MatchScrapingSevice(IMatchService matchService,
-                                   IPartialMatchResultRepository matchRepository)
+                                   IPartialMatchResultRepository matchRepository,
+                                   ILogger<MatchScrapingSevice> logger)
         {
             _matchService = matchService;
             _matchRepository = matchRepository;
+            _logger = logger;
         }
 
         public void Start(long matchSeqNumber = -1)
@@ -67,25 +69,48 @@ namespace D2MP.Services
 
         private async Task FetchData(long matchSeqNumber)
         {
-            for (long i = matchSeqNumber; true;)
+            try
             {
-                if (_cts.Token.IsCancellationRequested)
-                    return;
+                for (long i = matchSeqNumber; true;)
+                {
+                    if (_cts.Token.IsCancellationRequested)
+                        return;
 
-                var result = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
-                                               TimeSpan.FromSeconds(6),
-                                               _cts.Token);
+                    var result = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
+                                                   TimeSpan.FromSeconds(6),
+                                                   _cts.Token);
 
-                if (result == null)
-                    return;
+                    if (result == null)
+                        return;
 
-                await FilterAndSaveMatches(result.Matches);
+                    await FilterAndSaveMatches(result.Matches);
 
-                i = result.Matches.OrderBy(x => x.MatchSequenceNumber)
-                                  .Last()
-                                  .MatchSequenceNumber + 1;
+                    i = result.Matches.OrderBy(x => x.MatchSequenceNumber)
+                                      .Last()
+                                      .MatchSequenceNumber + 1;
 
-                _lastProcessedMatchTime = DateTime.UtcNow;
+                    _lastProcessedMatchTime = DateTime.UtcNow;
+                }
+            }
+            catch (AggregateException ae)
+            {
+                foreach (Exception ie in ae.Flatten().InnerExceptions)
+                {
+                    Exception nestedException = ie;
+                    do
+                    {
+                        if (!string.IsNullOrEmpty(nestedException.Message))
+                        {
+                            _logger.LogError(nestedException.Message + "; StackTrace: " + nestedException.StackTrace);
+                        }
+                        nestedException = nestedException.InnerException;
+                    }
+                    while (nestedException != null);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message + "; StackTrace: " + ex.StackTrace);
             }
         }
 
