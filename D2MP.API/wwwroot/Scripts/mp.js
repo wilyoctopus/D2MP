@@ -225,10 +225,10 @@ function populateTable(tableId, data) {
 
 //#region init
 
-window.onload = function () {
+window.onload = async function () {
+    await populateMatchCount();
+    await populateDuoStats();
     initSearchTextBoxes();
-    populateMatchCount();
-    populateDuoStats();
 }
 
 //#endregion
