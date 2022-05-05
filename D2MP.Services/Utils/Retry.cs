@@ -19,10 +19,8 @@ namespace D2MP.Services.Utils
 
                 try
                 {
-                    if (attempted > 0)
-                    {
-                        Thread.Sleep(retryInterval);
-                    }
+                    Thread.Sleep(retryInterval);
+
                     var result = await action();
 
                     if (result != null)
