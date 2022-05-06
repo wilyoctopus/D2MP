@@ -53,7 +53,7 @@ namespace D2MP.Services
             var apiResult = JsonConvert.DeserializeObject<ApiResponse<GetMatchHistoryBySequenceNumResponse>>(content);
 
             if (apiResult?.Result?.Status != 1)
-                throw new ServiceUnavailableException("Something went wrong with the request, the status was != 1");
+                throw new ServiceUnavailableException("Something went wrong with the request, the status was != 1, ResponseBody: " + content);
 
             return apiResult.Result;   
         }
@@ -73,12 +73,13 @@ namespace D2MP.Services
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 return null;
 
-            if (response.StatusCode == HttpStatusCode.Forbidden)
-                throw new InvalidApiKeyException("Api-Key most likely wrong");
-            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second.");
-
             string content = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+                throw new InvalidApiKeyException("Api-Key most likely wrong, ResponseBody: " + content);
+            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second. ResponseBody: " + content);
+
 
             return content;
         }
