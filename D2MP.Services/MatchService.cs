@@ -73,13 +73,12 @@ namespace D2MP.Services
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
                 return null;
 
-            string content = await response.Content.ReadAsStringAsync();
-
             if (response.StatusCode == HttpStatusCode.Forbidden)
-                throw new InvalidApiKeyException("Api-Key most likely wrong, ResponseBody: " + content);
+                throw new InvalidApiKeyException("Api-Key most likely wrong");
             else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second. ResponseBody: " + content);
+                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second");
 
+            string content = await response.Content.ReadAsStringAsync();
 
             return content;
         }
