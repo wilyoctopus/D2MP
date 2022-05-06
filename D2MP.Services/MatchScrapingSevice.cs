@@ -5,6 +5,7 @@ using D2MP.Models.Models;
 using D2MP.Services.Interfaces;
 using D2MP.Services.Utils;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace D2MP.Services
 {
@@ -78,18 +79,31 @@ namespace D2MP.Services
                     if (_cts.Token.IsCancellationRequested)
                         return;
 
-                    var result = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
-                                                   TimeSpan.FromSeconds(6),
-                                                   _cts.Token);
+                    var apiResponse = await Retry.Do(() => _matchService.GetMatchHistoryBySequenceNumber(i.ToString()),
+                                                           TimeSpan.FromSeconds(6),
+                                                           _cts.Token);
 
-                    if (result == null)
+                    if (apiResponse == null)
                         return;
 
-                    await FilterAndSaveMatches(result.Matches);
+                    // Some match ids return "Error retrieving match data", have to skip them
+                    if (apiResponse.Result.Status == 2)
+                    {
+                        _logger.LogWarning($"Received: {apiResponse.Result.StatusDetail}, skipping this match id");
+                        i += 1;
+                        continue;
+                    }
 
-                    i = result.Matches.OrderBy(x => x.MatchSequenceNumber)
-                                      .Last()
-                                      .MatchSequenceNumber + 1;
+                    if (apiResponse.Result.Status != 1)
+                    {
+                        throw new ApplicationException($"Unexcected status type: {apiResponse.Result.Status}. Status message: {apiResponse.Result.Status}. Json: {JsonConvert.SerializeObject(apiResponse)}");
+                    }
+
+                    await FilterAndSaveMatches(apiResponse.Result.Matches);
+
+                    i = apiResponse.Result.Matches.OrderBy(x => x.MatchSequenceNumber)
+                                                  .Last()
+                                                  .MatchSequenceNumber + 1;
 
                     _lastProcessedMatchTime = DateTime.UtcNow;
                 }

@@ -3,6 +3,7 @@ using D2MP.Models;
 using D2MP.Models.Exceptions;
 using D2MP.Models.Responses;
 using D2MP.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net;
 using System.Text;
@@ -15,18 +16,20 @@ namespace D2MP.Services
         private readonly string _steamApiKey;
         private readonly string _baseAddres = "https://api.steampowered.com/";
         private readonly HttpClient _client;
+        private readonly ILogger<MatchService> _logger;
 
         private string KeyString
         {
             get { return "?key=" + _steamApiKey; }
         }
         
-        // TODO: Logging
-        public MatchService(IConfigurationProvider configurationProvider)
+        public MatchService(IConfigurationProvider configurationProvider, 
+                            ILogger<MatchService> logger)
         {
             _configurationProvider = configurationProvider;
             _steamApiKey = _configurationProvider.GetSteamApiSecret();
             _client = new HttpClient();
+            _logger = logger;
         }
         
         public async Task<DetailedMatch> GetDetailedMatch(string matchId)
@@ -38,8 +41,10 @@ namespace D2MP.Services
             return apiResult.Result;
         }
 
-        public async Task<GetMatchHistoryBySequenceNumResponse> GetMatchHistoryBySequenceNumber(string startAtMatchSeqNumber = null)
+        public async Task<ApiResponse<GetMatchHistoryBySequenceNumResponse>> GetMatchHistoryBySequenceNumber(string startAtMatchSeqNumber = null)
         {
+            _logger.LogInformation("Getting match data for " + startAtMatchSeqNumber);
+
             StringBuilder extra = new StringBuilder();
 
             if (!string.IsNullOrEmpty(startAtMatchSeqNumber))
@@ -52,10 +57,7 @@ namespace D2MP.Services
 
             var apiResult = JsonConvert.DeserializeObject<ApiResponse<GetMatchHistoryBySequenceNumResponse>>(content);
 
-            if (apiResult?.Result?.Status != 1)
-                throw new ServiceUnavailableException("Something went wrong with the request, the status was != 1, ResponseBody: " + content);
-
-            return apiResult.Result;   
+            return apiResult;   
         }
         
         private string QueryBuilder(params string[] urlParts)
@@ -69,17 +71,21 @@ namespace D2MP.Services
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, address);
             var response = await _client.SendAsync(request);
-
-            if (response.StatusCode == HttpStatusCode.TooManyRequests)
-                return null;
-
-            if (response.StatusCode == HttpStatusCode.Forbidden)
-                throw new InvalidApiKeyException("Api-Key most likely wrong");
-            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second");
-
+            
             string content = await response.Content.ReadAsStringAsync();
 
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                _logger.LogError("Received 403 from STEAM API. Response body: " + content);
+                throw new InvalidApiKeyException("Api-Key most likely wrong");
+            }
+                
+            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable || response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                _logger.LogError($"Received {response.StatusCode} from STEAM API. Response body: " + content);
+                throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second");
+            }
+            
             return content;
         }
     }

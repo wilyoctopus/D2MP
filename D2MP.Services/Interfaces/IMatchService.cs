@@ -6,6 +6,6 @@ namespace D2MP.Services.Interfaces
     public interface IMatchService
     {
         Task<DetailedMatch> GetDetailedMatch(string matchId);
-        Task<GetMatchHistoryBySequenceNumResponse> GetMatchHistoryBySequenceNumber(string startAtMatchSeqNumber);
+        Task<ApiResponse<GetMatchHistoryBySequenceNumResponse>> GetMatchHistoryBySequenceNumber(string startAtMatchSeqNumber);
     }
 }

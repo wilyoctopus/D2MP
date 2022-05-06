@@ -28,6 +28,10 @@ namespace D2MP.Services.Utils
                     else
                         maxAttemptCount++;
                 }
+                catch (ServiceUnavailableException ex)
+                {
+                    maxAttemptCount++;
+                }
                 catch (Exception ex)
                 {
                     exceptions.Add(ex);

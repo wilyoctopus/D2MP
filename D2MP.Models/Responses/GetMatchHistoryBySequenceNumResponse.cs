@@ -5,6 +5,7 @@ namespace D2MP.Models.Responses
     public class GetMatchHistoryBySequenceNumResponse
     {
         private int _status;
+        private string _statusDetail;
         private List<DetailedMatch> _matches;
 
         [JsonProperty("matches")]
@@ -19,6 +20,13 @@ namespace D2MP.Models.Responses
         {
             get { return _status; }
             set { _status = value; }
+        }
+
+        [JsonProperty("statusDetail")]
+        public string StatusDetail
+        {
+            get { return _statusDetail; }
+            set { _statusDetail = value; }
         }
     }
 }
