@@ -74,15 +74,9 @@ namespace D2MP.Services
             
             string content = await response.Content.ReadAsStringAsync();
 
-            if (response.StatusCode == HttpStatusCode.Forbidden)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
-                _logger.LogError("Received 403 from STEAM API. Response body: " + content);
-                throw new InvalidApiKeyException("Api-Key most likely wrong");
-            }
-                
-            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable || response.StatusCode == HttpStatusCode.TooManyRequests)
-            {
-                _logger.LogError($"Received {response.StatusCode} from STEAM API. Response body: " + content);
+                _logger.LogError($"Received {response.StatusCode} from STEAM API. Response body: {content}");
                 throw new ServiceUnavailableException("Server is busy or api-call limit exceeded. Please wait 30 seconds and try again. Call only ~1 request/second");
             }
             
